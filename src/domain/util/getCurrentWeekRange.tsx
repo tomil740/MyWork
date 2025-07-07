@@ -16,20 +16,17 @@ export function getWeekRange(weekDate:Date): { start: Date; end: Date } {
 }
 
 export function getPageWeekRange(weekDate: Date): { start: Date; end: Date } {
-  console.log("the actull range function gets ", weekDate);
 
 
   const pageWeeks = 5;
   //get the current last week
   const firstWeek = getWeekRange(weekDate);
-  console.log("the actull range function which is",firstWeek.start);
 
   const end = firstWeek.end;
   const theStart = subWeeks(firstWeek.start, pageWeeks);
   //validate its satuerday
   const start = startOfWeek(theStart, { weekStartsOn: 0 }); // Sunday
 
-  console.log("the actull range function ", start ,end)
 
   return { start, end };
 }

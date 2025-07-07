@@ -10,7 +10,7 @@ export function usePaginatedDeclarations() {
   const [hasMore, setHasMore] = useState(true);
 
   const loadNextPage = useCallback(
-    async (range: WeeksRange) => {
+    async (range: WeeksRange) => { 
       const { start, end } = range;
 
       if (loading || !hasMore) {

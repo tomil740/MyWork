@@ -1,23 +1,55 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilState } from "recoil";
-import { getCurrentWeekRange } from "../domain/util/getCurrentWeekRange";
+import {getWeekRange } from "../domain/util/getCurrentWeekRange";
 import WeekSummary from "./components/WeekSummary";
 import DailyPresentation from "./components/DailyPresentation";
 import styles from "./style/LiveView.module.css";
 import { getWeekSum } from "../domain/util/getWeekSum";
 import type { DailyDeclare } from "../domain/models/DailyDeclare";
-import { useGetLiveViewDeclaries } from "../domain/usecase/useGetLiveViewDeclaries";
+import { useGetWeekDeclarations} from "../domain/usecase/useGetWeekDeclaries";
 import { useUpsertDeclare } from "../domain/usecase/useUpsertDeclare";
 import { LiveWeekState } from "../domain/states/LiveWeek";
 import  CircularProgress  from '@mui/material/CircularProgress';
 import  Snackbar  from '@mui/material/Snackbar';
+import { useParams } from "react-router-dom";
+import { castToDate } from "../domain/util/castToDate";
 
 export default function LiveView() {
+
   const [dailyDeclares, setDailyDeclares] = useRecoilState(LiveWeekState);
 
-  const { start, end } = useMemo(() => getCurrentWeekRange(), []);
+  const { WeekDate } = useParams<{ WeekDate: string }>();
 
-  const { data, loading, error } = useGetLiveViewDeclaries(start, end);
+  const didInitRef = useRef(false);
+
+  const { loadWeekData, loading, error } = useGetWeekDeclarations();
+
+  //those are the ui observed ui states to all the process around
+  const uiErrorState = useState<Error | null>(null);
+  const uiLoadingState = useState(false);
+
+  useEffect(() => {
+    if (!didInitRef.current) {
+      didInitRef.current = true;
+      let theDate = new Date()
+      if (WeekDate != null) {
+        theDate = castToDate(WeekDate);
+      } else {
+        uiErrorState[1](
+          Error("No week value has been pass, init current week")
+        );
+      }
+
+      const theWeekRange = getWeekRange(theDate)
+      const a = loadWeekData(theWeekRange.start ,theWeekRange.end);
+      a.then((ele)=>{
+        if(ele!=null){
+          setDailyDeclares(ele)
+        }
+      })
+    }
+  }, []);
+
 
   const {
     upsertDeclare,
@@ -32,14 +64,21 @@ export default function LiveView() {
     type: "info" as "success" | "error" | "info",
   });
 
-  // Sync server data to Recoil state once on success
   useEffect(() => {
-    if (!data || data.length === 0) return;
+    //will handle the logic to union all the process states into one ui observed state
+    uiErrorState[1](error);
+    uiLoadingState[1](loading);
+  }, [error, loading]);
 
-    setDailyDeclares(data);
-  }, [data]);
-  
-  
+  useEffect(() => {
+    if (error != null) {
+      setSnackbar({
+        open: true,
+        message: error.message,
+        type: "error",
+      });
+    }
+  }, [uiErrorState]);
 
   // Handle save success/failure feedback
   useEffect(() => {
@@ -57,8 +96,8 @@ export default function LiveView() {
   // Update handler
   const handleUpdate = (updated: DailyDeclare) => {
     upsertDeclare(updated);
-      //Optionally: update local recoil immediately (optimistic)
-     setDailyDeclares((prev:DailyDeclare[]) =>
+    //Optionally: update local recoil immediately (optimistic)
+    setDailyDeclares((prev: DailyDeclare[]) =>
       prev.map((d) => (d.date === updated.date ? updated : d))
     );
   };
@@ -82,10 +121,10 @@ export default function LiveView() {
         />
       )}
 
-      <WeekSummary stats={getWeekSum((new Date()),dailyDeclares || [] )} />
+      <WeekSummary stats={getWeekSum(new Date(), dailyDeclares || [])} />
 
       <div className={styles.dailyList}>
-        {dailyDeclares?.map((ele:DailyDeclare) => (
+        {dailyDeclares?.map((ele: DailyDeclare) => (
           <DailyPresentation
             daily={ele}
             onUpdate={handleUpdate}

@@ -10,6 +10,15 @@ export const router = createBrowserRouter([
         index: true,
         element: <WeekSumView />,
       },
+      {
+        path: "/LiveView",
+        element: <LiveView />,
+      },
+      {
+        path: "/LiveView/:WeekDate",
+        element: <LiveView />,
+      },
+      
     ],
   },
 ]);

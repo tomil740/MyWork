@@ -58,11 +58,13 @@ export function getWeeksSum(
       );
       const averagePerDay = weekSum / matchedData.length;
 
+      const a = Number(weekSum.toFixed(2));
+      const b = Number(averagePerDay.toFixed(2));
       
       weekStatsCollection.push({
         weekStart: start.toISOString(),
-        weekSum,
-        averagePerDay,
+        weekSum:a,
+        averagePerDay:b,
       });
     }else{
       weekStatsCollection.push(newObj);

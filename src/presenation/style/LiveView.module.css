@@ -10,5 +10,40 @@
     flex-direction: column;
     gap: 12px;
 
-  }
+}
+
+/* GetMoreButton.module.css */
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px; /* Space between content and button */
+}
+
+.button {
+  padding: 12px 24px;
+  background-color: var(--color-primary); /* Material 3 primary color */
+  color: var(--color-on-primary); /* Text color for the button */
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition */
+}
+
+.button:hover {
+  background-color: var(--color-primary-container); /* On hover */
+  transform: translateY(-2px); /* Slight lift effect */
+}
+
+.button:active {
+  background-color: var(--color-primary); /* On active */
+  transform: translateY(2px); /* Pressed effect */
+}
+
+.button:disabled {
+  background-color: var(--color-on-surface-variant);
+  cursor: not-allowed;
+}
   

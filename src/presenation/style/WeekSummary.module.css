@@ -47,3 +47,14 @@
   color: var(--color-on-surface);
   margin-top: 4px;
 }
+
+
+Link{
+  text-decoration: none;
+}
+a {
+  text-decoration: none;
+  color: inherit;  /* Make sure link color doesn't get overridden */
+}
+
+

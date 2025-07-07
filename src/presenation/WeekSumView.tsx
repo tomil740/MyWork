@@ -9,6 +9,7 @@ import styles from "./style/LiveView.module.css";
 import type { DailyDeclare } from "../domain/models/DailyDeclare";
 import WeekSummary from "./components/WeekSummary";
 
+
 export function WeekSumView() {
   //pagination use case
   const pageWeekRangeRef = useRef(getPageWeekRange(new Date()));
@@ -72,10 +73,9 @@ export function WeekSumView() {
     }
     const a = getWeeksSum(theRes, currentRange);
 
-    setTheData(prev=>prev.concat(a));
+    setTheData((prev) => prev.concat(a));
 
     pageWeekRangeRef.current = getPageWeekRange(subDays(currentRange.start, 3));
-
   }, []);
 
   return (
@@ -101,7 +101,11 @@ export function WeekSumView() {
         <WeekSummary stats={week} key={week.weekStart + index} />
       ))}
 
-      <button onClick={getNextPage}>get more ...</button>
+      <div className={styles.buttonContainer}>
+        <button className={styles.button} onClick={getNextPage}>
+          Get More...
+        </button>
+      </div>
     </div>
   );
 }
