@@ -1,16 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { WeekStats } from "../domain/models/WeekStats";
 import { usePaginatedDeclarations } from "../domain/usecase/usePaginatedDeclarations";
-import {  getPageWeekRange,} from "../domain/util/getCurrentWeekRange";
+import { getPageWeekRange } from "../domain/util/getCurrentWeekRange";
 import { CircularProgress, Snackbar } from "@mui/material";
 import { getWeeksSum } from "../domain/util/getWeekSums";
 import { subDays } from "date-fns";
 import styles from "./style/LiveView.module.css";
 import type { DailyDeclare } from "../domain/models/DailyDeclare";
 import WeekSummary from "./components/WeekSummary";
-
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../domain/states/Store";
 
 export function WeekSumView() {
+  const statistics = useSelector((s: RootState) => s.statistics.average);
+  const dispatch = useDispatch();
+
   //pagination use case
   const pageWeekRangeRef = useRef(getPageWeekRange(new Date()));
 
@@ -61,6 +65,11 @@ export function WeekSumView() {
       didInitRef.current = true;
       getNextPage();
     }
+
+    // Trigger statistics sync if needed
+    if (!statistics) {
+      dispatch({ type: "SyncStatistics" });
+    }
   }, []);
 
   const getNextPage = useCallback(async () => {
@@ -80,6 +89,19 @@ export function WeekSumView() {
 
   return (
     <div className={styles.container}>
+      {statistics ? (
+        <WeekSummary
+          stats={{
+            weekStart: new Date().toISOString(), // ISO string or date
+            weekSum: Number(statistics.averagePerWorkDay.toFixed(2)),
+            averagePerDay: Number((statistics.averagePerDay*7).toFixed(2)),
+          }}
+          isHeader = {true}
+        />
+      ) : (
+        <h2>statistics error... </h2>
+      )}
+
       {uiLoadingState[0] && (
         <div className="loading-overlay">
           <CircularProgress />

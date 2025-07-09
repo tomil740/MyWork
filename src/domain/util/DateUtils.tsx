@@ -25,3 +25,22 @@ export function castToDate(input: unknown): Date {
 
   throw new Error("Unsupported date format");
 }
+
+export function toDateOnlyISOString(date: Date): string {
+  const year = date.getFullYear();
+  const month = date.getMonth(); // 0-indexed
+  const day = date.getDate();
+//I had a bug deeffault time set to 3 am and with the time zone to iso we get missed the last day as it should be bofre...
+  // Create a new Date in UTC at midnight
+  const utcDate = new Date(Date.UTC(year, month, day, 14, 0, 0));
+
+  return utcDate.toISOString(); // will always return 'YYYY-MM-DDT00:00:00.000Z'
+}
+
+export function isSameDate(date1: Date, date2: Date): boolean {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  );
+}

@@ -76,3 +76,17 @@
     cursor: pointer;
   }
   
+
+
+/* Scoped specifically to container */
+.container.progressSuccess {
+  background: linear-gradient(135deg, #a7f3d0, #34d399);
+}
+
+.container.progressWarning {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.container.progressDanger {
+  background: linear-gradient(135deg, #f87171, #dc2626);
+}

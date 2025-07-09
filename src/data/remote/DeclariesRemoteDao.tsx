@@ -8,6 +8,7 @@ import {
 import { Timestamp, doc, setDoc } from "firebase/firestore";
 import type { DailyDeclareDto } from "./dtoModels/DailyDeclareDto";
 import { db } from "../firebaseConfig";
+import { castToDate } from '../../domain/util/DateUtils';
 
 const dailyDeclariesRef = collection(db, "DailyDeclaries");
 
@@ -25,6 +26,29 @@ export async function getWeekDeclarations(
       orderBy("date", "desc"),
       where("uid", "==", uid),
       where("date", ">=", start),
+      where("date", "<=", end)
+    );
+
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => doc.data() as DailyDeclareDto);
+  } catch (error) {
+    console.error("Error fetching week declarations:", error);
+    throw new Error("Could not fetch declarations");
+  }
+}
+
+export async function getDeclarationsUntil(
+  untilDate: Date,
+  uid: string
+): Promise<DailyDeclareDto[]> {
+  try {
+    const end = Timestamp.fromDate(untilDate);
+
+    console.error(castToDate(end))
+    const q = query(
+      dailyDeclariesRef,
+      orderBy("date", "desc"),
+      where("uid", "==", uid),
       where("date", "<=", end)
     );
 

@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import Select from "react-select";
 import styles from "../style/DailyPresentation.module.css";
 import type { DailyDeclare } from "../../domain/models/DailyDeclare";
-
+import classNames from "classnames";
 
 interface Props {
   daily: DailyDeclare;
   onUpdate: (updatedDaily: DailyDeclare) => void;
   editable?: boolean;
+  statVerage: number;
 }
 
 const amountOptions = [1, 2, 3, 4, 5, 6,7,8,9,10,11].map((v) => ({
@@ -19,17 +20,17 @@ const DailyPresentation: React.FC<Props> = ({
   daily,
   onUpdate,
   editable = true,
+  statVerage,
 }) => {
   const [isEdit, setIsEdit] = useState(false);
   const [localDaily, setLocalDaily] = useState(daily);
 
   const toggleEdit = () => {
-    if (isEdit){
-      if(localDaily!=daily){
-        onUpdate(localDaily)
+    if (isEdit) {
+      if (localDaily != daily) {
+        onUpdate(localDaily);
       }
-
-    };
+    }
     setIsEdit((prev) => !prev);
   };
 
@@ -61,7 +62,7 @@ const DailyPresentation: React.FC<Props> = ({
         !containerRef.current.contains(event.target as Node)
       ) {
         setIsEdit(false);
-        setLocalDaily(daily)
+        setLocalDaily(daily);
       }
     };
 
@@ -72,10 +73,33 @@ const DailyPresentation: React.FC<Props> = ({
     };
   }, [isEdit, localDaily, onUpdate]);
 
+  
+
+ 
+  const getContainerBackgroundColor = () => {
+    if (statVerage !== -1) {
+      const progressPercentage =
+        ((daily.work + daily.general) / statVerage) * 100;
+
+      if (progressPercentage >= 100) {
+        return styles.progressSuccess; // ✅ not "progressSuccess"
+      } else if (progressPercentage >= 50) {
+        return styles.progressWarning;
+      } else {
+        return styles.progressDanger;
+      }
+    } else {
+      return styles.progressDanger;
+    }
+  };
   return (
     <div
       ref={containerRef}
-      className={`${styles.container} ${isEdit ? styles.editMode : ""}`}
+      className={classNames(
+        styles.container,
+        getContainerBackgroundColor(), // Dynamically apply background class
+        isEdit ? styles.editMode : ""
+      )}
     >
       {editable && (
         <div className={styles.toggleEdit} onClick={toggleEdit}>

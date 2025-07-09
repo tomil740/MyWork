@@ -1,20 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState } from "recoil";
-import {getWeekRange } from "../domain/util/getCurrentWeekRange";
+import { getWeekRange } from "../domain/util/getCurrentWeekRange";
 import WeekSummary from "./components/WeekSummary";
 import DailyPresentation from "./components/DailyPresentation";
 import styles from "./style/LiveView.module.css";
 import { getWeekSum } from "../domain/util/getWeekSum";
 import type { DailyDeclare } from "../domain/models/DailyDeclare";
-import { useGetWeekDeclarations} from "../domain/usecase/useGetWeekDeclaries";
+import { useGetWeekDeclarations } from "../domain/usecase/useGetWeekDeclaries";
 import { useUpsertDeclare } from "../domain/usecase/useUpsertDeclare";
 import { LiveWeekState } from "../domain/states/LiveWeek";
-import  CircularProgress  from '@mui/material/CircularProgress';
-import  Snackbar  from '@mui/material/Snackbar';
+import CircularProgress from "@mui/material/CircularProgress";
+import Snackbar from "@mui/material/Snackbar";
 import { useParams } from "react-router-dom";
-import { castToDate } from "../domain/util/castToDate";
+import { castToDate } from "../domain/util/DateUtils";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../domain/states/Store";
 
 export default function LiveView() {
+  const statistics = useSelector((s: RootState) => s.statistics.average);
+  const dispatch = useDispatch();
 
   const [dailyDeclares, setDailyDeclares] = useRecoilState(LiveWeekState);
 
@@ -31,7 +35,7 @@ export default function LiveView() {
   useEffect(() => {
     if (!didInitRef.current) {
       didInitRef.current = true;
-      let theDate = new Date()
+      let theDate = new Date();
       if (WeekDate != null) {
         theDate = castToDate(WeekDate);
       } else {
@@ -40,16 +44,20 @@ export default function LiveView() {
         );
       }
 
-      const theWeekRange = getWeekRange(theDate)
-      const a = loadWeekData(theWeekRange.start ,theWeekRange.end);
-      a.then((ele)=>{
-        if(ele!=null){
-          setDailyDeclares(ele)
+      const theWeekRange = getWeekRange(theDate);
+      const a = loadWeekData(theWeekRange.start, theWeekRange.end);
+      a.then((ele) => {
+        if (ele != null) {
+          setDailyDeclares(ele);
         }
-      })
+      });
+
+      if(!statistics){
+        dispatch({ type: "SyncStatistics" });
+      }
+
     }
   }, []);
-
 
   const {
     upsertDeclare,
@@ -129,6 +137,7 @@ export default function LiveView() {
             daily={ele}
             onUpdate={handleUpdate}
             editable={true}
+            statVerage={statistics ? statistics.averagePerDay : -1}
             key={ele.date}
           />
         ))}
