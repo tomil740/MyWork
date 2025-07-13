@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState } from "recoil";
 import { getWeekRange } from "../domain/util/getCurrentWeekRange";
 import WeekSummary from "./components/WeekSummary";
 import DailyPresentation from "./components/DailyPresentation";

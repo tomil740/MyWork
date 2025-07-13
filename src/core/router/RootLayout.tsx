@@ -1,5 +1,4 @@
 import { Outlet } from "react-router-dom";
-import ThemeToggleBut from "../theme/ThemeToggleBut";
 import TopBar from "../../presenation/components/TopBar";
 
 const RootLayout = () => {

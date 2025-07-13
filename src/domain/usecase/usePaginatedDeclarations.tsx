@@ -1,12 +1,11 @@
 import { useState, useCallback } from "react";
-import type { DailyDeclare } from "../models/DailyDeclare";
 import { getWeekDeclarations } from "../../data/remote/DeclariesRemoteDao";
 import type { WeeksRange } from "../models/WeeksRange";
 
 export function usePaginatedDeclarations() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [hasMore, setHasMore] = useState(true);
+  const hasMore = useState(true)[0];
 
   const loadNextPage = useCallback(
     async (range: WeeksRange, uid: string) => {
