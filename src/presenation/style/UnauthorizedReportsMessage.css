@@ -1,0 +1,19 @@
+.unauthorized-reports-message {
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.unauthorized-reports-message .text-center {
+  text-align: center;
+}
+
+.unauthorized-reports-message p {
+  font-size: 1.125rem;
+  color: #4B5563;
+}
+
+.unauthorized-reports-message small {
+  font-size: 0.875rem;
+  color: #6B7280;
+}

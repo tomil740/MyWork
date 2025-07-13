@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { getWeekRange } from "../domain/util/getCurrentWeekRange";
 import WeekSummary from "./components/WeekSummary";
 import DailyPresentation from "./components/DailyPresentation";
@@ -15,12 +15,15 @@ import { useParams } from "react-router-dom";
 import { castToDate } from "../domain/util/DateUtils";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../domain/states/Store";
+import { getUid } from "../domain/util/getUid";
 
 export default function LiveView() {
   const statistics = useSelector((s: RootState) => s.statistics.average);
   const dispatch = useDispatch();
 
   const [dailyDeclares, setDailyDeclares] = useRecoilState(LiveWeekState);
+
+  const authUser = useSelector((state: RootState) => state.auth);
 
   const { WeekDate } = useParams<{ WeekDate: string }>();
 
@@ -45,7 +48,11 @@ export default function LiveView() {
       }
 
       const theWeekRange = getWeekRange(theDate);
-      const a = loadWeekData(theWeekRange.start, theWeekRange.end);
+      const a = loadWeekData(
+        theWeekRange.start,
+        theWeekRange.end,
+        getUid(authUser) ?? ""
+      );
       a.then((ele) => {
         if (ele != null) {
           setDailyDeclares(ele);
@@ -103,7 +110,7 @@ export default function LiveView() {
 
   // Update handler
   const handleUpdate = (updated: DailyDeclare) => {
-    upsertDeclare(updated);
+    upsertDeclare(updated, getUid(authUser) ?? "");
     //Optionally: update local recoil immediately (optimistic)
     setDailyDeclares((prev: DailyDeclare[]) =>
       prev.map((d) => (d.date === updated.date ? updated : d))

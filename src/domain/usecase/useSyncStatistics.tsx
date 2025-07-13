@@ -9,12 +9,11 @@ import {
   saveArchiveStat,
 } from "../../data/local/loadArchiveStat";
 import type { ArchiveStat } from "../models/ArchiveStat";
-import { FIXED_UID } from "../../data/firebaseConfig";
 import type { DailyDeclare } from "../models/DailyDeclare";
 import { subDays } from "date-fns";
 import { castToDate, isSameDate, toDateOnlyISOString } from "../util/DateUtils";
 
-export async function syncStatisticsCore(): Promise<{
+export async function syncStatisticsCore(uid:string): Promise<{
   data?: FinalStatistics;
   error?: string;
 }> {
@@ -33,6 +32,8 @@ export async function syncStatisticsCore(): Promise<{
     if (
       archiveStat &&
       isSameDate(new Date(archiveStat.untilDate), subDays(currentWeekStart, 1))
+      &&
+      archiveStat.uid == uid
     ) {
       validArchive = archiveStat;
       console.log("init regular , sync current week");
@@ -45,10 +46,7 @@ export async function syncStatisticsCore(): Promise<{
     if (!validArchive) {
       console.log("Archive stat full calcualtion")
       const untilDate = subDays(a, 1);
-      const archiveDeclarations = await getDeclarationsUntil(
-        untilDate,
-        FIXED_UID
-      );
+      const archiveDeclarations = await getDeclarationsUntil(untilDate, uid);
       console.log(archiveDeclarations)
       //get the first declare date
       const firstDecalreDate =
@@ -79,6 +77,7 @@ export async function syncStatisticsCore(): Promise<{
           (sum: number, d: DailyDeclare) => sum + d.work,
           0
         ),
+        uid:uid
       };
 
       saveArchiveStat(calculatedArchive);
@@ -90,7 +89,7 @@ export async function syncStatisticsCore(): Promise<{
     const currentWeekDeclarations = await getWeekDeclarations(
       currentWeek.start,
       currentWeek.end,
-      FIXED_UID
+      uid
     );
 
     const currentSum = currentWeekDeclarations.reduce(

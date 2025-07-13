@@ -9,7 +9,9 @@ import styles from "./style/LiveView.module.css";
 import type { DailyDeclare } from "../domain/models/DailyDeclare";
 import WeekSummary from "./components/WeekSummary";
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "../domain/states/Store";
+import type { RootState } from "../domain/states/Store"; 
+import UnauthorizedReportsMessage from "./components/UnauthorizedReportsMessage";
+import { getUid } from "../domain/util/getUid";
 
 export function WeekSumView() {
   const statistics = useSelector((s: RootState) => s.statistics.average);
@@ -17,6 +19,8 @@ export function WeekSumView() {
 
   //pagination use case
   const pageWeekRangeRef = useRef(getPageWeekRange(new Date()));
+
+  const authUser = useSelector((state: RootState) => state.auth);
 
   //pagiantion hock,bascily call back and its process states
   const { loadNextPage, loading, error, hasMore } = usePaginatedDeclarations();
@@ -75,7 +79,7 @@ export function WeekSumView() {
   const getNextPage = useCallback(async () => {
     const currentRange = pageWeekRangeRef.current;
 
-    const res = await loadNextPage(currentRange);
+    const res = await loadNextPage(currentRange, getUid(authUser) ?? "");
     let theRes: DailyDeclare[] = [];
     if (res != null) {
       theRes = res;
@@ -89,45 +93,54 @@ export function WeekSumView() {
 
   return (
     <div className={styles.container}>
-      {statistics ? (
-        <WeekSummary
-          stats={{
-            weekStart: new Date().toISOString(), // ISO string or date
-            weekSum: Number(statistics.averagePerWorkDay.toFixed(2)),
-            averagePerDay: Number((statistics.averagePerDay*7).toFixed(2)),
-          }}
-          isHeader = {true}
-        />
+      {authUser === null ? (
+        <UnauthorizedReportsMessage />
       ) : (
-        <h2>statistics error... </h2>
+        <>
+          {statistics ? (
+            <WeekSummary
+              stats={{
+                weekStart: new Date().toISOString(),
+                weekSum: Number(statistics.averagePerWorkDay.toFixed(2)),
+                averagePerDay: Number(
+                  (statistics.averagePerDay * 7).toFixed(2)
+                ),
+              }}
+              isHeader={true}
+            />
+          ) : (
+            <h2>statistics error...</h2>
+          )}
+
+          {uiLoadingState[0] && (
+            <div className="loading-overlay">
+              <CircularProgress />
+            </div>
+          )}
+
+          {snackbar.open && (
+            <Snackbar
+              open={snackbar.open}
+              message={snackbar.message}
+              autoHideDuration={1500}
+              onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+              anchorOrigin={{ vertical: "top", horizontal: "center" }}
+              className={`snackbar-${snackbar.type}`}
+            />
+          )}
+
+          {theData.map((week: WeekStats, index) => (
+            <WeekSummary stats={week} key={week.weekStart + index} />
+          ))}
+
+          <div className={styles.buttonContainer}>
+            <button className={styles.button} onClick={getNextPage}>
+              Get More...
+            </button>
+          </div>
+        </>
       )}
-
-      {uiLoadingState[0] && (
-        <div className="loading-overlay">
-          <CircularProgress />
-        </div>
-      )}
-
-      {snackbar.open && (
-        <Snackbar
-          open={snackbar.open}
-          message={snackbar.message}
-          autoHideDuration={1500}
-          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          className={`snackbar-${snackbar.type}`}
-        />
-      )}
-
-      {theData.map((week: WeekStats, index) => (
-        <WeekSummary stats={week} key={week.weekStart + index} />
-      ))}
-
-      <div className={styles.buttonContainer}>
-        <button className={styles.button} onClick={getNextPage}>
-          Get More...
-        </button>
-      </div>
     </div>
   );
+
 }

@@ -12,7 +12,7 @@ import { castToDate } from '../../domain/util/DateUtils';
 
 const dailyDeclariesRef = collection(db, "DailyDeclaries");
 
-export async function getWeekDeclarations(
+export async function getWeekDeclarations( 
   startDate: Date,
   endDate: Date,
   uid: string

@@ -9,8 +9,12 @@ export function loadArchiveStat(): ArchiveStat | null {
   } catch {
     return null;
   }
-}
+} 
 
 export function saveArchiveStat(stat: ArchiveStat) {
   localStorage.setItem(ARCHIVE_STAT_KEY, JSON.stringify(stat));
+}
+
+export function cleanArchiveStat() {
+  localStorage.removeItem(ARCHIVE_STAT_KEY);
 }

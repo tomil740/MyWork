@@ -7,6 +7,7 @@ export interface ArchiveStat {
   daySum: number;
   general: number;
   work: number;
+  uid:string;
 }
 
 

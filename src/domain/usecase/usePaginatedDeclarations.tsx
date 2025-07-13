@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import type { DailyDeclare } from "../models/DailyDeclare";
 import { getWeekDeclarations } from "../../data/remote/DeclariesRemoteDao";
-import { FIXED_UID } from "../../data/firebaseConfig";
 import type { WeeksRange } from "../models/WeeksRange";
 
 export function usePaginatedDeclarations() {
@@ -10,24 +9,24 @@ export function usePaginatedDeclarations() {
   const [hasMore, setHasMore] = useState(true);
 
   const loadNextPage = useCallback(
-    async (range: WeeksRange) => {  
+    async (range: WeeksRange, uid: string) => {
       const { start, end } = range;
 
       if (loading || !hasMore) {
-        if(!hasMore){
-         // setError(Error("End of data"))
+        if (!hasMore) {
+          // setError(Error("End of data"))
         }
-      
-        return null; 
+
+        return null;
       }
       setLoading(true);
       setError(null);
 
       try {
-        const result = await getWeekDeclarations(start, end, FIXED_UID);
-        console.log("fetched r",result)
-        //if (result.length === 0) 
-        return result
+        const result = await getWeekDeclarations(start, end, uid);
+        console.log("fetched r", result);
+        //if (result.length === 0)
+        return result;
       } catch (e) {
         setError(e as Error);
         return null;
